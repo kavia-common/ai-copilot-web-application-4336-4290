@@ -56,8 +56,9 @@ Frontend (.env in react_js_frontend):
 
 CORS:
 - The backend reads CORS_ORIGINS as a comma-separated list.
-- Ensure it includes your frontend origin, e.g.:
-  CORS_ORIGINS=http://localhost:3000
+- Ensure it includes your frontend origin(s), e.g.:
+  CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://vscode-internal-38549-beta.beta01.cloud.kavia.ai:3000
+  Replace the preview URL with your actual preview origin when applicable.
 
 ## Endpoints and Frontend Integration
 
@@ -71,7 +72,7 @@ Backend routes (mounted under /api):
   - If stream=true: Response is text/event-stream with lines like "data: <chunk>" and ends with "data: [DONE]"
   - If stream=false: JSON response { "assistant_reply": "<full text>" }
 
-Frontend client (src/api/client.js) matches these routes:
+Frontend client (src/api/client.js) matches these routes exactly:
 - Base URL: REACT_APP_BACKEND_URL or window.location.origin
 - listConversations -> GET /api/conversations
 - createConversation -> POST /api/conversations
@@ -85,26 +86,27 @@ Frontend client (src/api/client.js) matches these routes:
 
 - The backend emits "data: <token>\n\n" chunks and terminates with "data: [DONE]\n\n".
 - The frontend stream parser:
-  - Accept: text/event-stream
+  - Sends Accept: text/event-stream
   - Accumulates chunks, splits by double-newline, reads "data:" lines
   - Calls onToken() per token, and onDone() when [DONE] is received
   - Falls back to non-stream JSON if resp.body is not a stream
 
 ## Notes and Assumptions
 
-- OPENAI_API_KEY must be set in backend .env.
+- OPENAI_API_KEY must be set in fastapi_backend/.env.
 - For cross-origin dev (3000 -> 8000), set:
   - fastapi_backend/.env: CORS_ORIGINS=http://localhost:3000
   - react_js_frontend/.env: REACT_APP_BACKEND_URL=http://localhost:8000
+- Include your preview URL when using a hosted preview:
+  - fastapi_backend/.env: CORS_ORIGINS=...,https://<your-preview-host>:3000
 - Database defaults to SQLite (app.db) created automatically.
 
 ## Troubleshooting
 
 - CORS errors:
-  - Ensure backend CORS_ORIGINS includes the exact frontend origin.
+  - Ensure backend CORS_ORIGINS includes the exact frontend origin (including scheme and port).
 - 500 "OPENAI_API_KEY is not configured":
   - Set OPENAI_API_KEY in fastapi_backend/.env and restart backend.
 - Streaming not working:
   - Check network tab for text/event-stream response.
-  - If your environment (proxy/CDN) buffers SSE, the client will still work with non-stream (set stream=false as a workaround).
-
+  - Some proxies/CDNs buffer SSE. The client automatically falls back to non-stream (set stream=false as a workaround).

@@ -15,7 +15,7 @@ FastAPI backend for the AI Copilot app. Provides conversations CRUD and an OpenA
   - OPENAI_API_KEY (required for message endpoint)
   - OPENAI_MODEL (optional; default: gpt-4o-mini)
   - DB_URL (optional; default: sqlite:///./app.db)
-  - CORS_ORIGINS (comma-separated; include http://localhost:3000 for local React)
+  - CORS_ORIGINS (comma-separated; include your frontend origin(s), e.g., http://localhost:3000 and any hosted preview origin like https://<your-preview-host>:3000)
   - PORT (optional; default: 8000)
 
 2) Install dependencies:
