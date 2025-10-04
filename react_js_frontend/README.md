@@ -1,82 +1,58 @@
-# Lightweight React Template for KAVIA
+# AI Copilot Frontend (React)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+Minimalist React UI for the AI Copilot app. Uses the Soft Mono theme and vanilla CSS, no extra dependencies.
 
-## Features
+## Environment
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+Copy `.env.example` to `.env` and set the backend URL if needed:
 
-## Getting Started
+- REACT_APP_BACKEND_URL: Base URL of the FastAPI backend. If not set, the app will use the same origin as the frontend (window.location.origin).
+
+Example:
+REACT_APP_BACKEND_URL=http://localhost:8000
+
+## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### npm start
+Runs the app in development mode.
+Open http://localhost:3000 to view it in your browser.
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### npm test
+Launches the test runner.
 
-### `npm test`
+### npm run build
+Builds the app for production to the build folder.
 
-Launches the test runner in interactive watch mode.
+## How it works
 
-### `npm run build`
+- API client: src/api/client.js
+  - getBackendUrl() reads REACT_APP_BACKEND_URL or falls back to same-origin.
+  - Provides helpers: listConversations, createConversation, deleteConversation, getConversation, sendMessage (supports streaming via fetch when available, otherwise falls back to non-stream).
+- Chat state hook: src/hooks/useChat.js
+  - Manages conversations, active conversation, messages, and loading/streaming state.
+- Components:
+  - Header: src/components/Header.jsx
+  - Sidebar: src/components/Sidebar.jsx
+  - ChatPanel: src/components/ChatPanel.jsx
+- App layout: src/App.js
+  - Header, sidebar, and chat panel arranged in a responsive grid.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Accessibility
 
-## Customization
+- Semantic HTML elements and ARIA attributes are used for better screen reader support.
+- High-contrast text and minimalistic UI for clarity.
 
-### Colors
+## Theme
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+Soft Mono palette:
+- primary #6B7280
+- secondary #9CA3AF
+- success #10B981
+- error #EF4444
+- background #F9FAFB
+- surface #FFFFFF
+- text #111827
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
-
-### Components
-
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
-
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
-
-## Learn More
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Subtle gradient from-gray-50 to-gray-200 applied in the background.

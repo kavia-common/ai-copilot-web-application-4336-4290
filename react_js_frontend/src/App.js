@@ -1,47 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import "./index.css";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import ChatPanel from "./components/ChatPanel";
+import useChat from "./hooks/useChat";
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
+  /** Main app: header, sidebar, chat panel with minimalist Soft Mono theme */
+  const [theme, setTheme] = useState("light");
+  const chat = useChat();
 
-  // Effect to apply theme to document element
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   // PUBLIC_INTERFACE
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme((t) => (t === "light" ? "dark" : "light"));
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app-root">
+      <Header onToggleTheme={toggleTheme} currentTheme={theme} />
+      <main className="layout" role="main">
+        <Sidebar
+          conversations={chat.conversations}
+          activeId={chat.activeConversationId}
+          onSelect={chat.selectConversation}
+          onDelete={chat.removeConversation}
+          onNew={() => chat.startConversation("New Conversation")}
+        />
+        <ChatPanel
+          messages={chat.messages}
+          onSend={chat.send}
+          streaming={chat.streaming}
+          loading={chat.loading}
+        />
+      </main>
     </div>
   );
 }
