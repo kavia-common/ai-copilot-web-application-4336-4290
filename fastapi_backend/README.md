@@ -1,6 +1,6 @@
 # AI Copilot Backend (FastAPI)
 
-FastAPI backend for the AI Copilot app. Provides conversations CRUD and an OpenAI-powered chat endpoint with optional streaming via Server-Sent Events.
+FastAPI backend for the AI Copilot app. Provides conversations CRUD and an OpenAI-powered chat endpoint with optional streaming via Server-Sent Events (SSE).
 
 ## Requirements
 
@@ -45,3 +45,5 @@ OpenAPI docs: http://localhost:8000/docs
 - Database is managed via SQLAlchemy; defaults to a local SQLite file app.db.
 - Tables are auto-created on startup.
 - Conversation title auto-populates from the first user prompt if not provided.
+- CORS_ORIGINS must include your frontend origin when running on different hosts/ports.
+- SSE requires clients/proxies that do not buffer streaming responses; otherwise use non-stream (stream=false).

@@ -11,6 +11,10 @@ Copy `.env.example` to `.env` and set the backend URL if needed:
 Example:
 REACT_APP_BACKEND_URL=http://localhost:8000
 
+Notes:
+- When frontend and backend run on different ports (e.g., 3000 and 8000), set REACT_APP_BACKEND_URL to the backend and ensure backend CORS allows http://localhost:3000.
+- When deployed on the same origin, you can omit REACT_APP_BACKEND_URL.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -38,6 +42,11 @@ Builds the app for production to the build folder.
   - ChatPanel: src/components/ChatPanel.jsx
 - App layout: src/App.js
   - Header, sidebar, and chat panel arranged in a responsive grid.
+
+## Streaming (SSE)
+
+- If `stream=true`, the frontend requests `text/event-stream` and progressively renders tokens as they arrive.
+- If the environment doesn't support streaming (e.g., the response body isn't a ReadableStream), the client falls back to a single JSON response.
 
 ## Accessibility
 

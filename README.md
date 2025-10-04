@@ -5,51 +5,106 @@ Full-stack AI Copilot: React frontend + FastAPI backend with OpenAI integration.
 ## Structure
 
 - react_js_frontend: React UI (Soft Mono minimalist theme)
-- fastapi_backend: FastAPI service with conversations CRUD and chat with streaming
+- fastapi_backend: FastAPI service with conversations CRUD and chat with streaming (SSE)
 
-## Backend Setup
+## Quick Start (Local Dev)
 
-1) Copy environment file:
+Prereqs:
+- Node 16+ and npm
+- Python 3.9+
+- OpenAI API key
 
-cp fastapi_backend/.env.example fastapi_backend/.env
+1) Backend setup
+- Copy env and set values:
+  cp fastapi_backend/.env.example fastapi_backend/.env
+  # edit .env to set OPENAI_API_KEY and optionally others
 
-Edit fastapi_backend/.env and set:
-- OPENAI_API_KEY=your_key
-- OPENAI_MODEL=gpt-4o-mini (optional)
-- DB_URL=sqlite:///./app.db (or your DB)
-- CORS_ORIGINS=http://localhost:3000
+- Install and run:
+  cd fastapi_backend
+  pip install -r requirements.txt
+  uvicorn app.main:app --reload --port 8000
 
-2) Install and run backend:
+- API docs:
+  http://localhost:8000/docs
 
-cd fastapi_backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+2) Frontend setup
+- Copy env file (optional, only needed if backend is not same-origin):
+  cp react_js_frontend/.env.example react_js_frontend/.env
+  # In react_js_frontend/.env, set REACT_APP_BACKEND_URL=http://localhost:8000 if backend is on port 8000
 
-Open http://localhost:8000/docs to explore the API.
+- Install and run:
+  cd react_js_frontend
+  npm install
+  npm start
 
-## Frontend Setup
+- App URL:
+  http://localhost:3000
 
-In a separate terminal:
+## Configuration
 
-cd react_js_frontend
-npm install
-# Optional if backend is not same-origin:
-# echo "REACT_APP_BACKEND_URL=http://localhost:8000" > .env
-npm start
+Backend (.env in fastapi_backend):
+- OPENAI_API_KEY (required)
+- OPENAI_MODEL (optional; default: gpt-4o-mini)
+- DB_URL (optional; default: sqlite:///./app.db)
+- CORS_ORIGINS (optional; default: http://localhost:3000)
+- PORT (optional; default: 8000)
 
-App will be at http://localhost:3000.
+Frontend (.env in react_js_frontend):
+- REACT_APP_BACKEND_URL (optional)
+  - Set to backend origin (e.g., http://localhost:8000) if frontend and backend are on different origins.
+  - Leave unset to use same-origin.
 
-## How it connects
+CORS:
+- The backend reads CORS_ORIGINS as a comma-separated list.
+- Ensure it includes your frontend origin, e.g.:
+  CORS_ORIGINS=http://localhost:3000
 
-- Frontend calls the backend under /api:
-  - GET /api/conversations
-  - POST /api/conversations
-  - GET /api/conversations/{id}
-  - DELETE /api/conversations/{id}
-  - POST /api/conversations/{id}/messages (supports streaming via SSE when `stream=true`)
-- The frontend streaming client reads text/event-stream payloads and updates the UI progressively.
+## Endpoints and Frontend Integration
 
-## Notes
+Backend routes (mounted under /api):
+- GET /api/conversations
+- POST /api/conversations
+- GET /api/conversations/{id}
+- DELETE /api/conversations/{id}
+- POST /api/conversations/{id}/messages
+  - Request body: { "content": "text", "stream": true|false }
+  - If stream=true: Response is text/event-stream with lines like "data: <chunk>" and ends with "data: [DONE]"
+  - If stream=false: JSON response { "assistant_reply": "<full text>" }
 
-- Ensure CORS_ORIGINS in backend .env includes the frontend origin (http://localhost:3000 for local dev).
-- OPENAI_API_KEY must be set for the message endpoint to work.
+Frontend client (src/api/client.js) matches these routes:
+- Base URL: REACT_APP_BACKEND_URL or window.location.origin
+- listConversations -> GET /api/conversations
+- createConversation -> POST /api/conversations
+- getConversation -> GET /api/conversations/{id}
+- deleteConversation -> DELETE /api/conversations/{id}
+- sendMessage -> POST /api/conversations/{id}/messages
+  - Streaming supported via fetch ReadableStream parsing text/event-stream
+  - Fallback to non-stream JSON when streaming is unavailable
+
+## SSE Handling
+
+- The backend emits "data: <token>\n\n" chunks and terminates with "data: [DONE]\n\n".
+- The frontend stream parser:
+  - Accept: text/event-stream
+  - Accumulates chunks, splits by double-newline, reads "data:" lines
+  - Calls onToken() per token, and onDone() when [DONE] is received
+  - Falls back to non-stream JSON if resp.body is not a stream
+
+## Notes and Assumptions
+
+- OPENAI_API_KEY must be set in backend .env.
+- For cross-origin dev (3000 -> 8000), set:
+  - fastapi_backend/.env: CORS_ORIGINS=http://localhost:3000
+  - react_js_frontend/.env: REACT_APP_BACKEND_URL=http://localhost:8000
+- Database defaults to SQLite (app.db) created automatically.
+
+## Troubleshooting
+
+- CORS errors:
+  - Ensure backend CORS_ORIGINS includes the exact frontend origin.
+- 500 "OPENAI_API_KEY is not configured":
+  - Set OPENAI_API_KEY in fastapi_backend/.env and restart backend.
+- Streaming not working:
+  - Check network tab for text/event-stream response.
+  - If your environment (proxy/CDN) buffers SSE, the client will still work with non-stream (set stream=false as a workaround).
+
